@@ -37,7 +37,8 @@ while True:
         # for each client in the list
         for socket in read_sockets:
             if socket == clientSocket:
-                message = socket.recv(2048).decode().strip()
+                full = socket.recv(2048).decode().strip().split(": ")
+                message = full[1]
                 print()
                 # this client violate the uppercase rule
                 if message == "You are kicked!":
@@ -48,18 +49,19 @@ while True:
                     sys.exit(0)
                 else:
                     # get message broadcast from other people 
-                    print(message)
+                    print(full[0] +": > "+ message)
                     sys.stdout.write("<You> ")
                     sys.stdout.flush()
             else:
                 # sender sends message to server and broadcast to other client
-                sys.stdout.write("<You> ")
-                sys.stdout.flush()
+                
                 message = sys.stdin.readline().strip()
                 sender_info = clientSocket.getsockname()[0] + ": "
-                print("client: "+sender_info)
-                clientSocket.send(sender_info.encode())
-                clientSocket.send(message.encode())
+                # print("client: "+sender_info)
+                # clientSocket.send(sender_info.encode())
+                clientSocket.send((sender_info+message).encode())
+                sys.stdout.write("<You> ")
+                sys.stdout.flush()
                 # if sender type bye, they will exit the chatroom
                 if message == "bye":
                     sys.exit(1)

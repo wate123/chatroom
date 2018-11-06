@@ -52,7 +52,7 @@ def client_thread(conn, addr):
         # listen for client's message
         try:
             message = conn.recv(2048)
-
+            sender_info = message.decode().split(": ")[0]
             if message:
                 # if message is uppercase warn once, next time, send kick message to that client
                 if message.isupper():
