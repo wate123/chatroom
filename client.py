@@ -36,35 +36,38 @@ while True:
     if len(read_sockets):
         # for each client in the list
         for socket in read_sockets:
-            if socket == clientSocket:
-                full = socket.recv(2048).decode().strip().split(": ")
-                message = full[1]
-                print()
-                # this client violate the uppercase rule
-                if message == "You are kicked!":
-                    # broadcast the user getting kicked by server and teriminate the client
-                    clientSocket.send((gethostname()+" kicked").encode())
-                    sys.stdout.write(message)
-                    sys.stdout.flush()
-                    sys.exit(0)
+            if socket:
+                if socket == clientSocket:
+                    full = socket.recv(2048).decode().split(": ")
+                    message = full[1].strip()
+                    print()
+                    # this client violate the uppercase rule
+                    if message == "You are kicked!":
+                        # broadcast the user getting kicked by server and teriminate the client
+                        clientSocket.send((gethostname()+" kicked").encode())
+                        sys.stdout.write(message)
+                        sys.stdout.flush()
+                        sys.exit(0)
+                    else:
+                        # get message broadcast from other people 
+                        print(full[0] +": > "+ message)
+                        sys.stdout.write("<You> ")
+                        sys.stdout.flush()
                 else:
-                    # get message broadcast from other people 
-                    print(full[0] +": > "+ message)
+                    # sender sends message to server and broadcast to other client
+                    
+                    message = sys.stdin.readline().strip()
+                    sender_info = clientSocket.getsockname()[0] + ": "
+                    # print("client: "+sender_info)
+                    # clientSocket.send(sender_info.encode())
+                    clientSocket.send((sender_info+message).encode())
                     sys.stdout.write("<You> ")
                     sys.stdout.flush()
+                    # if sender type bye, they will exit the chatroom
+                    if message == "bye":
+                        sys.exit(1)
             else:
-                # sender sends message to server and broadcast to other client
-                
-                message = sys.stdin.readline().strip()
-                sender_info = clientSocket.getsockname()[0] + ": "
-                # print("client: "+sender_info)
-                # clientSocket.send(sender_info.encode())
-                clientSocket.send((sender_info+message).encode())
-                sys.stdout.write("<You> ")
-                sys.stdout.flush()
-                # if sender type bye, they will exit the chatroom
-                if message == "bye":
-                    sys.exit(1)
+                break
     else:
         break    
 clientSocket.close()
